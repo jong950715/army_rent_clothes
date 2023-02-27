@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:army_rent_clothes/model/brand_model.dart';
 
 class ItemCardModel {
-  final Image image;
-  final String brand;
-  final String content;
+  final int index;
+  final Image thumbNail;
+  final BrandModel brand;
+  final String title;
   final int originalPrice;
   final int sellingPrice;
   final int discount;
 
   ItemCardModel({
-    required this.image,
+    required this.index,
+    required this.thumbNail,
     required this.brand,
-    required this.content,
+    required this.title,
     required this.originalPrice,
     required this.sellingPrice,
     discount,
   })  : assert(originalPrice >= sellingPrice),
-        discount =
-            discount ?? sellingPrice == originalPrice ? 0 :((1 - sellingPrice / originalPrice) * 100).round();
+        discount = discount ?? sellingPrice == originalPrice
+            ? 0
+            : ((1 - sellingPrice / originalPrice) * 100).round();
 }
 
 class ItemCardPairModel {
@@ -33,7 +37,7 @@ class ItemCardPairModel {
         model2 = model2 ??
             (twoModels!.length > 1
                 ? twoModels[1]
-                : dummyItemCardModel); //TODO null 이면 dummy 채워야해
+                : blankItemCardModel);
 
   static List<ItemCardPairModel> pairItemsFromItems(
       List<ItemCardModel> models) {
@@ -52,10 +56,11 @@ class ItemCardPairModel {
   }
 }
 
-final ItemCardModel dummyItemCardModel = ItemCardModel(
-  image: Image.asset("asset/img/dummySquare.png"),
-  brand: "",
-  content: "",
+final ItemCardModel blankItemCardModel = ItemCardModel(
+  index: 0,
+  thumbNail: Image.asset("asset/img/dummySquare.png"),
+  brand: BrandModel("", Image.asset("asset/img/dummySquare.png")),
+  title: "",
   originalPrice: 0,
   sellingPrice: 0,
 );

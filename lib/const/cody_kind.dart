@@ -14,15 +14,15 @@ enum CodyKind{
 }
 
 /*
-미니멀
-아메카지
-시티보이
-캐주얼
-비즈니스캐주얼
-스트릿
-하이틴
-로맨틱
-걸리시
-스포티
+minimal("미니멀"),
+amekaji("아메카지"),
+cityboy("시티보이"),
+casual("캐주얼"),
+businessCasual("비즈니스캐주얼"),
+street("스트릿"),
+highteen("하이틴"),
+romantic("로맨틱"),
+girlish("걸리시"),
+sporty("스포티"),
 
  */

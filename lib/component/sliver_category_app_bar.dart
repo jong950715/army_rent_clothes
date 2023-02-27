@@ -1,8 +1,8 @@
-import 'package:army_rent_clothes/const/category_item.dart';
+import 'package:army_rent_clothes/const/browser_tab_item.dart';
 import 'package:flutter/material.dart';
 
 class SliverCategoryAppBar extends StatelessWidget {
-  final CategoryItem selectedCategory;
+  final BrowserTabItem selectedCategory;
   // late final ThemeData _theme;
   const SliverCategoryAppBar({Key? key, required this.selectedCategory})
       : super(key: key);
@@ -11,7 +11,7 @@ class SliverCategoryAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     var _theme = Theme.of(context);
     return SliverAppBar(
-      toolbarHeight: kToolbarHeight-10,
+      toolbarHeight: kToolbarHeight-12,
       backgroundColor: Colors.white,
       titleTextStyle: _theme.textTheme.titleLarge,
       floating: true,
@@ -19,6 +19,7 @@ class SliverCategoryAppBar extends StatelessWidget {
       titleSpacing: 0,
       title: _title(context),
       elevation: 0,
+      bottom: PreferredSize(child: Divider(height: 3), preferredSize: Size.fromHeight(3)),
     );
   }
 

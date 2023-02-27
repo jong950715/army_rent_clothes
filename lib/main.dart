@@ -1,3 +1,4 @@
+import 'package:army_rent_clothes/const/globals.dart';
 import 'package:army_rent_clothes/screen/home_screen.dart';
 import 'package:army_rent_clothes/screen/overlay_screen_example.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(MaterialApp(
     theme: _themeData,
+    navigatorKey: mainNavigatorKey,
     home: const HomeScreen(),
   ));
 }
@@ -28,8 +30,9 @@ final _themeData = ThemeData(
 TODO
 major
 1. 아이템 상세페이지
-2. 코디 넣기
-2-1. 코디-카테고리 통합하기
+2. subCategory 넣기
+3. fetch에 정보 더 넘기기 (category, filter 등)
+4. 코디 모델, view 새로 고민하기 (가격 없애고)
 
 
 minor
@@ -37,4 +40,7 @@ minor
 2. 적절한 아이콘 찾아 넣기
 3. 폰트 정리하기
 
+
+flutter build apk --release --target-platform=android-arm64
+/build/app/outputs/apk/release/app-release.apk
  */
