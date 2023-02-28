@@ -11,30 +11,54 @@ import 'package:quiver/collection.dart';
 //   Map<String, OptionModel> get delegate => _data;
 // }
 
-
 //TODO stock 0이면 못고르게 (회색이나 취소선)
 
-//옵션 관리
-class ProductOptionModel {
-  final List<OptionModel> availableOptions; // 고를 수 있는 옵션 종류
-  Map<SelectedOptionModel, int> selectedOptionsAndQty;
+//--------------------------//
+class Pop {
+  final List<String> optionOrders; // list of OptionTitle
+  final Map<String, List<String>> availableOptions; // optionTitle: options
+  final int basePrice;
+  final List<Map<String, String>> optionInfos;
+  Pop({required this.availableOptions, required this.optionInfos, required this.basePrice})
+      : optionOrders = availableOptions.keys.toList();
 
-  ProductOptionModel(this.availableOptions)
-      : selectedOptionsAndQty = {};
+  Sop getNewSop() {
+    return Sop(optionOrders);
+  }
+
+  Map<String, String> getoptionInfo(Sop sop) {
+    return optionInfos[getInfoIndex(sop)];
+  }
+
+  int getInfoIndex(Sop sop) {
+    sop.selectedOption.values.forEach((e) {if(e==null){throw Exception("다 채워서 보내라잉");}}); //unreachable
+    int ret = 0;
+    int magnitude = 1;
+    for (final optionTitle in optionOrders.reversed) {
+      int? index = availableOptions[optionTitle]?.indexOf(sop.selectedOption[optionTitle]!);
+      ret += index!*magnitude;
+      magnitude *= availableOptions[optionTitle]!.length;
+      // sop.selectedOption[optionTitle]
+    }
+    return ret;
+  }
 }
 
-//선택한 옵션 ex) color: red
-class SelectedOptionModel {
-  final List<OptionModel> productOptions; // 고를 수 있는 옵션 종류
-  Map<OptionModel, OptionItemModel?> selectedOption;
+class Sop {
+  Map<String, String?> selectedOption;
+  final List<String> optionOrder;
 
-  Map<OptionModel, OptionItemModel?> get setOption => selectedOption;
+  Sop(List<String> optionTitles)
+      : selectedOption = {
+          for (var optionTitle in optionTitles) optionTitle: null
+        },
+        optionOrder = optionTitles;
 
-  SelectedOptionModel(this.productOptions)
-      : selectedOption = {for (OptionModel e in productOptions) e: null};
+  Map<String, String?> get setOption => selectedOption;
 
-  bool operator ==(o) => o is SelectedOptionModel && o.toString() == o.toString();
-  int get hashCode => this.toString().hashCode;
+  bool isSelected(String option) {
+    return selectedOption[option] != null;
+  }
 
   bool isFinished() {
     bool ret = true;
@@ -44,64 +68,78 @@ class SelectedOptionModel {
     return ret;
   }
 
-  bool isSelected(OptionModel option){
-    return selectedOption[option] != null;
-  }
-
   @override
   String toString() {
     String ret = "";
-    // productOptions.forEach((e) {ret += e.optionTitle;});
-    productOptions.asMap().forEach((index, e) {
-      ret += index + 1 == productOptions.length
-          ? "${selectedOption[e]?.optionName}"
-          : "${selectedOption[e]?.optionName} / ";
+    optionOrder.asMap().forEach((index, e) {
+      ret += index + 1 == optionOrder.length
+          ? "${selectedOption[e]}"
+          : "${selectedOption[e]} / ";
     });
     return ret;
   }
+
+  String? getByIndex(int index) {
+    return selectedOption[optionOrder[index]];
+  }
+
+  Sop deepCopy(){
+    Sop ret = Sop(optionOrder);
+    ret.selectedOption = Map.from(selectedOption);
+    return ret;
+  }
+  Sop copyWith(String optionTitle, String optionItem){
+    Sop sop = deepCopy();
+    sop.setOption[optionTitle]=optionItem;
+    return sop;
+  }
+
+  //make same data output same hash
+  @override
+  bool operator ==(o) => o is Sop && o.toString() == o.toString();
+  @override
+  int get hashCode => toString().hashCode;
 }
 
-//옵션모델 ex) color, [red, blue ...]
-class OptionModel {
-  final String optionTitle;
-  final List<OptionItemModel> optionItems;
-
-  OptionModel({required this.optionTitle, required this.optionItems});
-}
-
-//옵션아이템 ex) XL, red
-class OptionItemModel {
-  final String optionName;
-  final int price;
-  final int stock;
-
-  OptionItemModel(
-      {required this.optionName, required this.price, required this.stock});
-}
-
-
-// mocks //
-OptionModel mockOptionModelSize = OptionModel(
-  optionTitle: "사이즈",
-  optionItems: [
-    OptionItemModel(optionName: "S", price: 0, stock: 3),
-    OptionItemModel(optionName: "M", price: 0, stock: 3),
-    OptionItemModel(optionName: "L", price: 0, stock: 3),
-    OptionItemModel(optionName: "XL", price: 0, stock: 3),
+Pop mockProductOptionModel = Pop(
+  availableOptions: {
+    "color": ["Yellow", "Red"],
+    "size": ["XL", "M"],
+    "etc": ["a", "b"]
+  },
+  basePrice: 10000,
+  optionInfos: [
+    {
+      "qty": "1",
+      "price": "1000",
+    },
+    {
+      "qty": "2",
+      "price": "1000",
+    },
+    {
+      "qty": "3",
+      "price": "1000",
+    },
+    {
+      "qty": "4",
+      "price": "1000",
+    },
+    {
+      "qty": "5",
+      "price": "1000",
+    },
+    {
+      "qty": "0",
+      "price": "1000",
+    },
+    {
+      "qty": "7",
+      "price": "1000",
+    },
+    {
+      "qty": "8",
+      "price": "1000",
+    },
   ],
 );
-
-OptionModel mockOptionModelColor = OptionModel(
-  optionTitle: "색상",
-  optionItems: [
-    OptionItemModel(optionName: "검정색", price: 0, stock: 3),
-    OptionItemModel(optionName: "흰색", price: 0, stock: 3),
-    OptionItemModel(optionName: "빨간색", price: 0, stock: 3),
-    OptionItemModel(optionName: "노란색", price: 0, stock: 3),
-  ],
-);
-
-List<OptionModel> mockOptionModels = [
-  mockOptionModelSize,
-  mockOptionModelColor
-];
