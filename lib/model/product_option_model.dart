@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:quiver/collection.dart';
 typedef SetStateType = void Function(VoidCallback fn);
 class OptionManager {
   final Map<Sop, int> selectedOptions = {};
+  Completer completer = Completer();
 
   OptionManager();
 
@@ -32,6 +34,7 @@ class OptionManager {
   void qtyAdder(Sop sop, int qty) {
     selectedOptions[sop] = (selectedOptions[sop] ?? 0) + qty;
     selectedOptions[sop] = max<int>(selectedOptions[sop]!, 1);
+    completer.complete();
   }
 
   @override
@@ -41,6 +44,14 @@ class OptionManager {
       ret += "옵션 : ${key}, 개수 : ${value}";
     });
     return ret;
+  }
+
+  Stream<OptionManager> getStream() async* {
+    while(true){
+      await completer.future;
+      completer = Completer();
+      yield this;
+    }
   }
 }
 

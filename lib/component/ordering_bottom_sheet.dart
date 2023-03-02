@@ -5,98 +5,92 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
 //TODO 옵션이 참 어렵네
-/**
- * 고르는건 종류별로 골라야 하지만
- * 옵션가, 재고 관리는 합체된 옵션별로 관리가 되어야함...
- */
 
-class OrderingBottomSheet extends StatefulWidget {
+class OrderingBottomSheet extends StatelessWidget {
   final ProductOptionModel productOptions;
   final OptionManager selectedOptions;
   const OrderingBottomSheet({Key? key, required this.productOptions, required this.selectedOptions}) : super(key: key);
 
-  @override
-  State<OrderingBottomSheet> createState() => _OrderingBottomSheetState();
-}
 
-class _OrderingBottomSheetState extends State<OrderingBottomSheet> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Container(
-        height: 400,
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () async {
-                Sop? selectedOption = await showModalBottomSheet<Sop>(
-                  context: context,
-                  builder: (context) =>
-                      OptionBottomSheet(productOption: widget.productOptions),
-                );
-
-                print(selectedOption.toString());
-                if (selectedOption != null) {
-                  widget.selectedOptions.qtyAdder(selectedOption, 1);
-                }
-                setState(() {
-
-                });
-
-                print(widget.selectedOptions);
-              },
-              child: Row(
-                children: [
-                  Text(
-                    "옵션",
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                  ),
-                  Icon(Icons.keyboard_arrow_down_outlined)
-                ],
-              ),
-            ),
-            if (widget.selectedOptions.isEmpty) Text("옵션을 골라주세요."),
-            Expanded(
-              child: ListView(
-                children: widget.selectedOptions.entries
-                    .map((e) => _OptionCard(
-                          selectedOptionModel: e.key,
-                          qty: e.value,
-                          qtyAdder: (Sop sop, int qty) {
-                            widget.selectedOptions.qtyAdder(sop, qty);
-                          },
-                          optionInfo: widget.productOptions.getoptionInfo(e.key),
-                          basePrice: widget.productOptions.basePrice,
-                        ))
-                    .toList(),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return StreamBuilder<OptionManager>(
+      stream: selectedOptions.getStream(),
+      builder: (context, snapshot) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Container(
+            height: 400,
+            child: Column(
               children: [
+                GestureDetector(
+                  onTap: () async {
+                    Sop? selectedOption = await showModalBottomSheet<Sop>(
+                      context: context,
+                      builder: (context) =>
+                          OptionBottomSheet(productOption: productOptions),
+                    );
+
+                    print(selectedOption.toString());
+                    if (selectedOption != null) {
+                      selectedOptions.qtyAdder(selectedOption, 1);
+                    }
+
+                    print(selectedOptions);
+                  },
+                  child: Row(
+                    children: [
+                      Text(
+                        "옵션",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                      ),
+                      Icon(Icons.keyboard_arrow_down_outlined)
+                    ],
+                  ),
+                ),
+                if (selectedOptions.isEmpty) Text("옵션을 골라주세요."),
                 Expanded(
-                    child: TextButton(
-                  onPressed: () {},
-                  child: Text("장바구니",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w500)),
-                  style: TextButton.styleFrom(backgroundColor: Colors.black),
-                )),
-                SizedBox.fromSize(size: Size(1, 0)),
-                Expanded(
-                    child: TextButton(
-                  onPressed: () {},
-                  child: Text("바로구매",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w500)),
-                  style: TextButton.styleFrom(backgroundColor: Colors.black),
-                )),
+                  child: ListView(
+                    children: selectedOptions.entries
+                        .map((e) => _OptionCard(
+                              selectedOptionModel: e.key,
+                              qty: e.value,
+                              qtyAdder: (Sop sop, int qty) {
+                                selectedOptions.qtyAdder(sop, qty);
+                              },
+                              optionInfo: productOptions.getoptionInfo(e.key),
+                              basePrice: productOptions.basePrice,
+                            ))
+                        .toList(),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Expanded(
+                        child: TextButton(
+                      onPressed: () {},
+                      child: Text("장바구니",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w500)),
+                      style: TextButton.styleFrom(backgroundColor: Colors.black),
+                    )),
+                    SizedBox.fromSize(size: Size(1, 0)),
+                    Expanded(
+                        child: TextButton(
+                      onPressed: () {},
+                      child: Text("바로구매",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.w500)),
+                      style: TextButton.styleFrom(backgroundColor: Colors.black),
+                    )),
+                  ],
+                )
               ],
-            )
-          ],
-        ),
-      ),
+            ),
+          ),
+        );
+      }
     );
   }
 }
