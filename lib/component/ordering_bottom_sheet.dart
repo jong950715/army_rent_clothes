@@ -9,17 +9,17 @@ import 'package:flutter/material.dart';
  * 고르는건 종류별로 골라야 하지만
  * 옵션가, 재고 관리는 합체된 옵션별로 관리가 되어야함...
  */
+
 class OrderingBottomSheet extends StatefulWidget {
-  const OrderingBottomSheet({Key? key}) : super(key: key);
+  final ProductOptionModel productOptions;
+  final OptionManager selectedOptions;
+  const OrderingBottomSheet({Key? key, required this.productOptions, required this.selectedOptions}) : super(key: key);
 
   @override
   State<OrderingBottomSheet> createState() => _OrderingBottomSheetState();
 }
 
 class _OrderingBottomSheetState extends State<OrderingBottomSheet> {
-  final Pop productOptions = mockProductOptionModel;
-  final Map<Sop, int> selectedOptions = {};
-
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -33,18 +33,18 @@ class _OrderingBottomSheetState extends State<OrderingBottomSheet> {
                 Sop? selectedOption = await showModalBottomSheet<Sop>(
                   context: context,
                   builder: (context) =>
-                      OptionBottomSheet(productOption: productOptions),
+                      OptionBottomSheet(productOption: widget.productOptions),
                 );
 
                 print(selectedOption.toString());
                 if (selectedOption != null) {
-                  selectedOptions[selectedOption] =
-                      (selectedOptions[selectedOption] ?? 0) + 1;
+                  widget.selectedOptions.qtyAdder(selectedOption, 1);
                 }
-                selectedOptions.forEach((key, value) {
-                  print("옵션 : ${key}, 개수 : ${value}");
+                setState(() {
+
                 });
-                setState(() {});
+
+                print(widget.selectedOptions);
               },
               child: Row(
                 children: [
@@ -56,31 +56,53 @@ class _OrderingBottomSheetState extends State<OrderingBottomSheet> {
                 ],
               ),
             ),
-            if (selectedOptions.isEmpty) Text("옵션을 골라주세요."),
-            ...selectedOptions.entries
-                .map((e) => _OptionCard(
-                      selectedOptionModel: e.key,
-                      qty: e.value,
-                      qtyAdder: qtyAdder,
-                      optionInfo: productOptions.getoptionInfo(e.key),
-                      basePrice: productOptions.basePrice,
-                    ))
-                .toList(),
+            if (widget.selectedOptions.isEmpty) Text("옵션을 골라주세요."),
+            Expanded(
+              child: ListView(
+                children: widget.selectedOptions.entries
+                    .map((e) => _OptionCard(
+                          selectedOptionModel: e.key,
+                          qty: e.value,
+                          qtyAdder: (Sop sop, int qty) {
+                            widget.selectedOptions.qtyAdder(sop, qty);
+                          },
+                          optionInfo: widget.productOptions.getoptionInfo(e.key),
+                          basePrice: widget.productOptions.basePrice,
+                        ))
+                    .toList(),
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                Expanded(
+                    child: TextButton(
+                  onPressed: () {},
+                  child: Text("장바구니",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w500)),
+                  style: TextButton.styleFrom(backgroundColor: Colors.black),
+                )),
+                SizedBox.fromSize(size: Size(1, 0)),
+                Expanded(
+                    child: TextButton(
+                  onPressed: () {},
+                  child: Text("바로구매",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w500)),
+                  style: TextButton.styleFrom(backgroundColor: Colors.black),
+                )),
+              ],
+            )
           ],
         ),
       ),
     );
   }
-
-  void qtyAdder(Sop sop, int qty) {
-    selectedOptions[sop] = (selectedOptions[sop] ?? 0) + qty;
-    selectedOptions[sop] = max<int>(selectedOptions[sop]!, 1);
-    setState(() {});
-  }
 }
 
 class OptionBottomSheet extends StatefulWidget {
-  final Pop productOption;
+  final ProductOptionModel productOption;
   const OptionBottomSheet({Key? key, required this.productOption})
       : super(key: key);
 
@@ -238,7 +260,8 @@ class _OptionCard extends StatelessWidget {
                     ],
                   ),
                   Expanded(child: SizedBox()),
-                  Text("${(basePrice + int.parse(optionInfo['price']!))*qty }원"),
+                  Text(
+                      "${(basePrice + int.parse(optionInfo['price']!)) * qty}원"),
                   IconButton(
                     onPressed: () {},
                     icon: Icon(Icons.cancel_outlined),

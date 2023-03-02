@@ -4,6 +4,7 @@ import 'package:army_rent_clothes/const/_mocks.dart';
 import 'package:army_rent_clothes/const/globals.dart';
 import 'package:army_rent_clothes/model/item_card_model.dart';
 import 'package:army_rent_clothes/model/product_detail_model.dart';
+import 'package:army_rent_clothes/model/product_option_model.dart';
 import 'package:army_rent_clothes/repository/my_repositories.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +22,9 @@ class ProductDetail extends StatefulWidget {
 
 class _ProductDetailState extends State<ProductDetail>
     with TickerProviderStateMixin {
+  final ProductOptionModel productOptions = mockProductOptionModel;
+  final OptionManager selectedOptions = OptionManager();
+  bool isSelectedOptions = false;
   late final TabController _tabController;
   late final List<ItemDetailTab> tabs;
 
@@ -34,6 +38,9 @@ class _ProductDetailState extends State<ProductDetail>
 
   @override
   Widget build(BuildContext context) {
+    if (isSelectedOptions == false) { //TODO make pretty
+      isSelectedOptions = true;
+    }
     final overLapHandle1 = SliverOverlapAbsorberHandle();
     return Scaffold(
       body: FutureBuilder<ProductDetailModel>(
@@ -62,7 +69,8 @@ class _ProductDetailState extends State<ProductDetail>
                 // SliverOverlapInjector(handle: overLapHandle1),
                 );
           }),
-      bottomNavigationBar: _Bottom(),
+      bottomNavigationBar: _Bottom(
+          productOptions: productOptions, selectedOptions: selectedOptions),
     );
   }
 }
@@ -292,7 +300,11 @@ class SliverItemDetailOverview extends StatelessWidget {
 }
 
 class _Bottom extends StatelessWidget {
-  const _Bottom({Key? key}) : super(key: key);
+  final ProductOptionModel productOptions;
+  final OptionManager selectedOptions;
+  const _Bottom(
+      {Key? key, required this.productOptions, required this.selectedOptions})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -327,7 +339,9 @@ class _Bottom extends StatelessWidget {
               onTap: () => showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
-                  return OrderingBottomSheet();
+                  return OrderingBottomSheet(
+                      productOptions: productOptions,
+                      selectedOptions: selectedOptions);
                 },
               ),
               child: Container(
