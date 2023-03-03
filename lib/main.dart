@@ -1,9 +1,12 @@
 import 'package:army_rent_clothes/const/globals.dart';
+import 'package:army_rent_clothes/repository/my_repositories.dart';
 import 'package:army_rent_clothes/screen/home_screen.dart';
 import 'package:army_rent_clothes/screen/overlay_screen_example.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+Future<void> main() async {
+  globalCart = await CartRepository.fetch();
+
   runApp(MaterialApp(
     theme: _themeData,
     navigatorKey: mainNavigatorKey,

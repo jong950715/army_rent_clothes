@@ -1,3 +1,5 @@
+import 'package:army_rent_clothes/const/globals.dart';
+import 'package:army_rent_clothes/screen/cart_screen.dart';
 import 'package:flutter/material.dart';
 
 class SliverHomeAppBar extends StatelessWidget {
@@ -25,7 +27,9 @@ class SliverHomeAppBar extends StatelessWidget {
                       color: _theme.iconTheme.color,
                     )),
                 IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      mainNavigatorKey.currentState!.push(MaterialPageRoute(builder: (context) => CartScreen(),));
+                    },
                     icon: Icon(
                       Icons.shopping_cart_outlined,
                       color: _theme.iconTheme.color,

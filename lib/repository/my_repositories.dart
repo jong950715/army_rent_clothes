@@ -1,4 +1,5 @@
 import 'package:army_rent_clothes/const/bottom_tap_item.dart';
+import 'package:army_rent_clothes/model/cart_model.dart';
 import 'package:army_rent_clothes/model/home_scroll_content_model.dart';
 import 'package:army_rent_clothes/model/product_detail_model.dart';
 import 'package:flutter/material.dart';
@@ -145,5 +146,12 @@ class HomeScrollContentRepository {
         (index) => Random().nextBool()
             ? mockHomeScrollContentModel1
             : mockHomeScrollContentModel2).toList();
+  }
+}
+
+class CartRepository {
+  static Future<CartModel> fetch() async {
+    await Future.delayed(const Duration(seconds: 1));
+    return CartModel(cartItems: []);
   }
 }

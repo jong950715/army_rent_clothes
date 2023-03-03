@@ -18,20 +18,20 @@ import 'package:quiver/collection.dart';
 
 //--------------------------//
 typedef SetStateType = void Function(VoidCallback fn);
-class OptionManager {
-  final Map<Sop, int> selectedOptions = {};
+class OptionSelector {
+  final Map<SelectedOption, int> selectedOptions = {};
   Completer completer = Completer();
 
-  OptionManager();
+  OptionSelector();
 
   // @override
   // bool operator ==(o) => o is Sop && o.toString() == o.toString();
   // @override
   // int get hashCode => toString().hashCode;
   bool get isEmpty => selectedOptions.isEmpty;
-  Iterable<MapEntry<Sop, int>> get entries => selectedOptions.entries;
+  Iterable<MapEntry<SelectedOption, int>> get entries => selectedOptions.entries;
 
-  void qtyAdder(Sop sop, int qty) {
+  void qtyAdder(SelectedOption sop, int qty) {
     selectedOptions[sop] = (selectedOptions[sop] ?? 0) + qty;
     selectedOptions[sop] = max<int>(selectedOptions[sop]!, 1);
     completer.complete();
@@ -46,7 +46,8 @@ class OptionManager {
     return ret;
   }
 
-  Stream<OptionManager> getStream() async* {
+  //Statefull widget 대신에 streambuilder를 쓰면 재rendering 범위를 최소화 할 수 있음.
+  Stream<OptionSelector> getStream() async* {
     while(true){
       await completer.future;
       completer = Completer();
@@ -66,15 +67,15 @@ class ProductOptionModel {
       required this.basePrice})
       : optionOrders = availableOptions.keys.toList();
 
-  Sop getNewSop() {
-    return Sop(optionOrders);
+  SelectedOption getNewSop() {
+    return SelectedOption(optionOrders);
   }
 
-  Map<String, String> getoptionInfo(Sop sop) {
+  Map<String, String> getoptionInfo(SelectedOption sop) {
     return optionInfos[getInfoIndex(sop)];
   }
 
-  int getInfoIndex(Sop sop) {
+  int getInfoIndex(SelectedOption sop) {
     sop.selectedOption.values.forEach((e) {
       if (e == null) {
         throw Exception("다 채워서 보내라잉");
@@ -93,11 +94,12 @@ class ProductOptionModel {
   }
 }
 
-class Sop {
-  Map<String, String?> selectedOption;
+class SelectedOption {
+  //TODO Map<int, int?>로 변경해야 할 수도 (서버의 성능문제)
+  Map<String, String?> selectedOption; //optionTitle(color) : optionItem(red)
   final List<String> optionOrder;
 
-  Sop(List<String> optionTitles)
+  SelectedOption(List<String> optionTitles)
       : selectedOption = {
           for (var optionTitle in optionTitles) optionTitle: null
         },
@@ -132,21 +134,21 @@ class Sop {
     return selectedOption[optionOrder[index]];
   }
 
-  Sop deepCopy() {
-    Sop ret = Sop(optionOrder);
+  SelectedOption deepCopy() {
+    SelectedOption ret = SelectedOption(optionOrder);
     ret.selectedOption = Map.from(selectedOption);
     return ret;
   }
 
-  Sop copyWith(String optionTitle, String optionItem) {
-    Sop sop = deepCopy();
+  SelectedOption copyWith(String optionTitle, String optionItem) {
+    SelectedOption sop = deepCopy();
     sop.setOption[optionTitle] = optionItem;
     return sop;
   }
 
   //make same data output same hash
   @override
-  bool operator ==(o) => o is Sop && o.toString() == o.toString();
+  bool operator ==(o) => o is SelectedOption && o.toString() == toString();
   @override
   int get hashCode => toString().hashCode;
 }

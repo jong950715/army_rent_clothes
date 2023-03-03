@@ -1,21 +1,23 @@
 import 'dart:math';
 
+import 'package:army_rent_clothes/component/qty_adder.dart';
+import 'package:army_rent_clothes/const/globals.dart';
+import 'package:army_rent_clothes/model/cart_model.dart';
+import 'package:army_rent_clothes/model/product_detail_model.dart';
 import 'package:army_rent_clothes/model/product_option_model.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
-//TODO 옵션이 참 어렵네
-
 class OrderingBottomSheet extends StatelessWidget {
-  final ProductOptionModel productOptions;
-  final OptionManager selectedOptions;
-  const OrderingBottomSheet({Key? key, required this.productOptions, required this.selectedOptions}) : super(key: key);
+  final ProductDetailModel productDetailModel;
+  final OptionSelector optionSelector;
+  const OrderingBottomSheet({Key? key, required this.productDetailModel, required this.optionSelector}) : super(key: key);
 
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<OptionManager>(
-      stream: selectedOptions.getStream(),
+    return StreamBuilder<OptionSelector>(
+      stream: optionSelector.getStream(),
       builder: (context, snapshot) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -25,18 +27,18 @@ class OrderingBottomSheet extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () async {
-                    Sop? selectedOption = await showModalBottomSheet<Sop>(
+                    SelectedOption? selectedOption = await showModalBottomSheet<SelectedOption>(
                       context: context,
                       builder: (context) =>
-                          OptionBottomSheet(productOption: productOptions),
+                          OptionBottomSheet(productOption: productDetailModel.productOption),
                     );
 
                     print(selectedOption.toString());
                     if (selectedOption != null) {
-                      selectedOptions.qtyAdder(selectedOption, 1);
+                      optionSelector.qtyAdder(selectedOption, 1);
                     }
 
-                    print(selectedOptions);
+                    print(optionSelector);
                   },
                   child: Row(
                     children: [
@@ -48,18 +50,18 @@ class OrderingBottomSheet extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (selectedOptions.isEmpty) Text("옵션을 골라주세요."),
+                if (optionSelector.isEmpty) Text("옵션을 골라주세요."),
                 Expanded(
                   child: ListView(
-                    children: selectedOptions.entries
+                    children: optionSelector.entries
                         .map((e) => _OptionCard(
                               selectedOptionModel: e.key,
                               qty: e.value,
-                              qtyAdder: (Sop sop, int qty) {
-                                selectedOptions.qtyAdder(sop, qty);
+                              qtyAdder: (SelectedOption sop, int qty) {
+                                optionSelector.qtyAdder(sop, qty);
                               },
-                              optionInfo: productOptions.getoptionInfo(e.key),
-                              basePrice: productOptions.basePrice,
+                              optionInfo: productDetailModel.productOption.getoptionInfo(e.key),
+                              basePrice: productDetailModel.productOption.basePrice,
                             ))
                         .toList(),
                   ),
@@ -69,7 +71,11 @@ class OrderingBottomSheet extends StatelessWidget {
                   children: [
                     Expanded(
                         child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        final cartItemModel = CartItemModel(product: productDetailModel, selectedOptions: optionSelector.selectedOptions);
+                        globalCart.add(cartItemModel);
+                        print(globalCart.cartItems);
+                      },
                       child: Text("장바구니",
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.w500)),
@@ -105,7 +111,7 @@ class OptionBottomSheet extends StatefulWidget {
 }
 
 class _OptionBottomSheetState extends State<OptionBottomSheet> {
-  late final Sop selectedOptionModel;
+  late final SelectedOption selectedOptionModel;
 
   @override
   void initState() {
@@ -199,7 +205,7 @@ class _OptionBottomSheetState extends State<OptionBottomSheet> {
 }
 
 class _OptionCard extends StatelessWidget {
-  final Sop selectedOptionModel;
+  final SelectedOption selectedOptionModel;
   final int qty;
   final int basePrice;
   final Map<String, String> optionInfo;
@@ -232,27 +238,28 @@ class _OptionCard extends StatelessWidget {
                   textAlign: TextAlign.left),
               Row(
                 children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          qtyAdder(selectedOptionModel, 1);
-                        },
-                        icon: Icon(Icons.add),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                      ),
-                      Text("${qty}"),
-                      IconButton(
-                        onPressed: () {
-                          qtyAdder(selectedOptionModel, -1);
-                        },
-                        icon: Icon(Icons.remove),
-                        padding: EdgeInsets.zero,
-                        constraints: BoxConstraints(),
-                      ),
-                    ],
-                  ),
+                  QtyAdder(adder: (int i) => qtyAdder(selectedOptionModel, i), qty: qty,),
+                  // Row(
+                  //   children: [
+                  //     IconButton(
+                  //       onPressed: () {
+                  //         qtyAdder(selectedOptionModel, 1);
+                  //       },
+                  //       icon: Icon(Icons.add),
+                  //       padding: EdgeInsets.zero,
+                  //       constraints: BoxConstraints(),
+                  //     ),
+                  //     Text("${qty}"),
+                  //     IconButton(
+                  //       onPressed: () {
+                  //         qtyAdder(selectedOptionModel, -1);
+                  //       },
+                  //       icon: Icon(Icons.remove),
+                  //       padding: EdgeInsets.zero,
+                  //       constraints: BoxConstraints(),
+                  //     ),
+                  //   ],
+                  // ),
                   Expanded(child: SizedBox()),
                   Text(
                       "${(basePrice + int.parse(optionInfo['price']!)) * qty}원"),

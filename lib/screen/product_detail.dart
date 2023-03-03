@@ -22,8 +22,8 @@ class ProductDetail extends StatefulWidget {
 
 class _ProductDetailState extends State<ProductDetail>
     with TickerProviderStateMixin {
-  final ProductOptionModel productOptions = mockProductOptionModel;
-  final OptionManager selectedOptions = OptionManager();
+  // final ProductOptionModel productOptions = mockProductOptionModel;
+  final OptionSelector optionSelector = OptionSelector();
   bool isSelectedOptions = false;
   late final TabController _tabController;
   late final List<ItemDetailTab> tabs;
@@ -38,16 +38,17 @@ class _ProductDetailState extends State<ProductDetail>
 
   @override
   Widget build(BuildContext context) {
-    if (isSelectedOptions == false) { //TODO make pretty
+    if (isSelectedOptions == false) {
+      //TODO make pretty
       isSelectedOptions = true;
     }
     final overLapHandle1 = SliverOverlapAbsorberHandle();
-    return Scaffold(
-      body: FutureBuilder<ProductDetailModel>(
-          future: ProductDetailRepository.fetch(widget.productIndex),
-          builder: (context, snapshot) {
-            ProductDetailModel? model = snapshot.data;
-            return NestedScrollView(
+    return FutureBuilder<ProductDetailModel>(
+        future: ProductDetailRepository.fetch(widget.productIndex),
+        builder: (context, snapshot) {
+          ProductDetailModel? model = snapshot.data;
+          return Scaffold(
+            body: NestedScrollView(
                 headerSliverBuilder:
                     (BuildContext context, bool innerBoxIsScrolled) {
                   return <Widget>[
@@ -67,11 +68,13 @@ class _ProductDetailState extends State<ProductDetail>
                   ],
                 )
                 // SliverOverlapInjector(handle: overLapHandle1),
-                );
-          }),
-      bottomNavigationBar: _Bottom(
-          productOptions: productOptions, selectedOptions: selectedOptions),
-    );
+                ),
+            bottomNavigationBar: model != null
+                ? _Bottom(
+                    productDetailModel: model, optionSelector: optionSelector)
+                : null,
+          );
+        });
   }
 }
 
@@ -300,10 +303,12 @@ class SliverItemDetailOverview extends StatelessWidget {
 }
 
 class _Bottom extends StatelessWidget {
-  final ProductOptionModel productOptions;
-  final OptionManager selectedOptions;
+  final ProductDetailModel productDetailModel;
+  final OptionSelector optionSelector;
   const _Bottom(
-      {Key? key, required this.productOptions, required this.selectedOptions})
+      {Key? key,
+      required this.productDetailModel,
+      required this.optionSelector})
       : super(key: key);
 
   @override
@@ -340,8 +345,8 @@ class _Bottom extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return OrderingBottomSheet(
-                      productOptions: productOptions,
-                      selectedOptions: selectedOptions);
+                      productDetailModel: productDetailModel,
+                      optionSelector: optionSelector);
                 },
               ),
               child: Container(
